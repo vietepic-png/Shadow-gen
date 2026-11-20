@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Shadow Generator</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark">SG</div>
+        <div>
+          <h1>Shadow Generator</h1>
+          <span class="subtitle">2D Tilemap Shadow Tool</span>
+        </div>
+      </div>
+
+      <div class="top-actions">
+        <button class="button button-secondary" id="open-btn">Open PNG</button>
+        <button class="button button-primary" id="export-btn">Export PNG</button>
+        <input type="file" id="file-input" accept="image/png" hidden />
+      </div>
+    </header>
+
+    <main class="workspace">
+      <section class="canvas-panel">
+        <div class="canvas-toolbar">
+          <div class="tool-group">
+            <button class="tool-button active" title="Select">↖</button>
+            <button class="tool-button" title="Polygon selection">⬡</button>
+            <button class="tool-button" title="Brush">✎</button>
+            <button class="tool-button" title="Erase">⌫</button>
+          </div>
+          <div class="canvas-status">
+            <span id="canvas-size">No image</span>
+            <span class="separator">·</span>
+            <span id="zoom-level">100%</span>
+          </div>
+          <div class="tool-group">
+            <button class="tool-button" title="Zoom out">−</button>
+            <button class="tool-button" title="Zoom in">+</button>
+            <button class="tool-button" title="Fit canvas">Fit</button>
+          </div>
+        </div>
+
+        <div class="canvas-stage" id="canvas-stage">
+          <div class="empty-state" id="empty-state">
+            <div class="empty-icon">▧</div>
+            <h2>Open a tilemap PNG</h2>
+            <p>Import an image to begin selecting objects and generating shadows.</p>
+            <button class="button button-primary" id="empty-open-btn">Choose PNG</button>
+          </div>
+          <canvas id="map-canvas" hidden></canvas>
+        </div>
+
+        <footer class="canvas-footer">
+          <span class="hint">Drag to pan · Scroll to zoom</span>
+          <span id="cursor-position">X: — &nbsp; Y: —</span>
+        </footer>
+      </section>
+
+      <aside class="sidebar">
+        <section class="panel">
+          <div class="panel-heading">
+            <h2>Shadow Settings</h2>
+            <span class="panel-icon">☼</span>
+          </div>
+
+          <div class="control">
+            <div class="control-label">
+              <label for="sun-angle">Sun angle</label>
+              <output id="sun-angle-value">135°</output>
+            </div>
+            <input id="sun-angle" type="range" min="0" max="360" value="135" />
+          </div>
+
+          <div class="control">
+            <div class="control-label">
+              <label for="shadow-length">Shadow length</label>
+              <output id="shadow-length-value">Auto</output>
+            </div>
+            <input id="shadow-length" type="range" min="0" max="200" value="80" />
+            <div class="range-labels"><span>Short</span><span>Long</span></div>
+          </div>
+
+          <div class="control">
+            <div class="control-label">
+              <label for="object-height">Object height</label>
+              <output id="object-height-value">32 px</output>
+            </div>
+            <input id="object-height" type="range" min="1" max="256" value="32" />
+          </div>
+
+          <div class="control">
+            <div class="control-label">
+              <label for="opacity">Opacity</label>
+              <output id="opacity-value">35%</output>
+            </div>
+            <input id="opacity" type="range" min="0" max="100" value="35" />
+          </div>
+
+          <div class="control">
+            <div class="control-label">
+              <label for="blur">Blur</label>
+              <output id="blur-value">1 px</output>
+            </div>
+            <input id="blur" type="range" min="0" max="20" value="1" />
+          </div>
+
+          <div class="control">
+            <div class="control-label">
+              <label for="shadow-color">Shadow color</label>
+              <output>#252535</output>
+            </div>
+            <input id="shadow-color" type="color" value="#252535" />
+          </div>
+
+          <div class="toggle-row">
+            <div>
+              <strong>Contact shadow</strong>
+              <span>Keep a sharp shadow near the object</span>
+            </div>
+            <input type="checkbox" id="contact-shadow" checked />
+          </div>
+        </section>
+
+        <section class="panel">
+          <div class="panel-heading">
+            <h2>Day / Night</h2>
+            <span class="panel-icon">◐</span>
+          </div>
+
+          <div class="control">
+            <div class="control-label">
+              <label for="time-of-day">Time</label>
+              <output id="time-value">12:00</output>
+            </div>
+            <input id="time-of-day" type="range" min="0" max="1440" step="10" value="720" />
+            <div class="range-labels"><span>00:00</span><span>06:00</span><span>12:00</span><span>18:00</span><span>24:00</span></div>
+          </div>
+
+          <div class="preset-row">
+            <button class="preset-button" data-time="360">Dawn</button>
+            <button class="preset-button" data-time="720">Noon</button>
+            <button class="preset-button" data-time="1080">Sunset</button>
+            <button class="preset-button" data-time="0">Night</button>
+          </div>
+        </section>
+
+        <section class="panel objects-panel">
+          <div class="panel-heading">
+            <h2>Objects</h2>
+            <button class="icon-button" title="Add object">＋</button>
+          </div>
+          <div class="object-list" id="object-list">
+            <div class="object-empty">No objects selected</div>
+          </div>
+          <div class="object-actions">
+            <button class="button button-secondary button-small" id="select-object-btn">Select object</button>
+            <button class="button button-secondary button-small" id="clear-selection-btn">Clear</button>
+          </div>
+        </section>
+      </aside>
+    </main>
+
+    <div class="statusbar">
+      <span class="status-dot"></span>
+      <span>Ready</span>
+      <span class="status-right">PNG · Local processing</span>
+    </div>
+  </div>
+  <script type="module" src="app.js"></script>
+</body>
+</html>
